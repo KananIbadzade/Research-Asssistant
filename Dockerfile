@@ -23,12 +23,12 @@ WORKDIR /app
 # Copy the built JAR from build stage
 COPY --from=build /app/target/*.jar app.jar
 
-# Expose port (Railway will set PORT environment variable)
+# Expose port (Render will set PORT environment variable)
 EXPOSE 8080
 
-# Health check
+# Health check for Render
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8080/actuator/health || exit 1
 
-# Run the application
-ENTRYPOINT ["java", "-jar", "app.jar"]
+# Run the application with proper JVM settings for Render
+ENTRYPOINT ["java", "-Xmx512m", "-Xms256m", "-jar", "app.jar"]

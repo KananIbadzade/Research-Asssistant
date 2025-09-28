@@ -120,4 +120,5 @@ public class ResearchService {
         prompt.append(request.getContent());
         return prompt.toString();
     }
+
 }
