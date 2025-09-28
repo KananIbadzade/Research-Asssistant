@@ -8,11 +8,15 @@ WORKDIR /app
 COPY .mvn/ .mvn
 COPY mvnw pom.xml ./
 
+# Make mvnw executable and set proper permissions
+RUN chmod +x ./mvnw
+
 # Copy source code
 COPY src ./src
 
-# Build the application
-RUN ./mvnw clean package -DskipTests
+# Build the application with retry and verbose output
+RUN ./mvnw clean package -DskipTests -X || \
+    (echo "First build failed, retrying..." && ./mvnw clean package -DskipTests)
 
 # Production stage
 FROM eclipse-temurin:17-jre-jammy
