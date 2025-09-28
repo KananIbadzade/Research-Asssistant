@@ -15,18 +15,18 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ResearchService {
 
-    private final String geminiApiUrl;
-    private final String geminiApiKey;
+    @Value("${gemini.api.url}")
+    private String geminiApiUrl;
+
+    @Value("${gemini.api.key}")
+    private String geminiApiKey;
+
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
-    public ResearchService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper,
-                          @Value("${gemini.api.url:https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=}") String geminiApiUrl,
-                          @Value("${gemini.api.key:}") String geminiApiKey) {
+    public ResearchService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
-        this.geminiApiUrl = geminiApiUrl;
-        this.geminiApiKey = geminiApiKey;
     }
 
     public String processContent(ResearchRequest request) {
