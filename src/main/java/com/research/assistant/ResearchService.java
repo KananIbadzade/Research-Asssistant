@@ -15,18 +15,22 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class ResearchService {
 
-    @Value("${gemini.api.url}")
-    private String geminiApiUrl;
-
-    @Value("${gemini.api.key}")
-    private String geminiApiKey;
-
+    private final String geminiApiUrl;
+    private final String geminiApiKey;
     private final WebClient webClient;
     private final ObjectMapper objectMapper;
 
     public ResearchService(WebClient.Builder webClientBuilder, ObjectMapper objectMapper) {
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
+        
+        // Use environment variables directly - no configuration files needed
+        this.geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
+        this.geminiApiKey = System.getenv("GEMINI_KEY");
+        
+        log.info("ResearchService initialized with environment-based configuration");
+        log.info("API URL configured: {}", geminiApiUrl);
+        log.info("API Key configured: {}", geminiApiKey != null && !geminiApiKey.trim().isEmpty());
     }
 
     public String processContent(ResearchRequest request) {
