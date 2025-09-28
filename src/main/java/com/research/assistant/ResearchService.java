@@ -32,13 +32,17 @@ public class ResearchService {
     public String processContent(ResearchRequest request) {
         try {
             log.info("Processing request with operation: {}", request.getOperation());
+            log.info("API Key configured: {}", geminiApiKey != null && !geminiApiKey.trim().isEmpty());
+            log.info("API URL: {}", geminiApiUrl);
 
             // Validate request
             if (request.getContent() == null || request.getContent().trim().isEmpty()) {
+                log.error("Content is null or empty");
                 throw new IllegalArgumentException("Content cannot be null or empty");
             }
 
             if (request.getOperation() == null || request.getOperation().trim().isEmpty()) {
+                log.error("Operation is null or empty");
                 throw new IllegalArgumentException("Operation cannot be null or empty");
             }
 
@@ -62,6 +66,7 @@ public class ResearchService {
             );
 
             log.info("Making request to Gemini API: {}", geminiApiUrl + "***");
+            log.info("Request body: {}", requestBody);
 
             String response = webClient.post()
                     .uri(geminiApiUrl + geminiApiKey)
@@ -70,7 +75,7 @@ public class ResearchService {
                     .bodyToMono(String.class)
                     .block();
 
-            log.debug("Received response from Gemini API");
+            log.info("Received response from Gemini API: {}", response);
             return extractTextFromResponse(response);
 
         } catch (WebClientResponseException e) {
