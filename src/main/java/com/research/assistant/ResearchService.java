@@ -24,6 +24,15 @@ public class ResearchService {
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
         
+        // Configure port for Render deployment
+        String port = System.getenv("PORT");
+        if (port != null) {
+            System.setProperty("server.port", port);
+            log.info("Server configured to run on Render port: {}", port);
+        } else {
+            log.info("Server will use default port: 8080");
+        }
+        
         // Use environment variables directly - no configuration files needed
         this.geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
         this.geminiApiKey = System.getenv("GEMINI_KEY");
@@ -31,6 +40,9 @@ public class ResearchService {
         log.info("ResearchService initialized with environment-based configuration");
         log.info("API URL configured: {}", geminiApiUrl);
         log.info("API Key configured: {}", geminiApiKey != null && !geminiApiKey.trim().isEmpty());
+        log.info("Environment variables:");
+        log.info("PORT: {}", System.getenv("PORT"));
+        log.info("GEMINI_KEY: {}", System.getenv("GEMINI_KEY") != null ? "SET" : "NOT SET");
     }
 
     public String processContent(ResearchRequest request) {
