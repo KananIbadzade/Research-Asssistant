@@ -7,7 +7,6 @@ import java.util.*;
 
 @RestController
 @RequestMapping("/api/research")
-@CrossOrigin(origins = "*")
 @AllArgsConstructor
 public class ResearchController {
     private final ResearchService researchService;
@@ -17,8 +16,8 @@ public class ResearchController {
         return "ok"; 
     }
 
-    @PostMapping(value = "/process", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map<String, Object>> process(@RequestBody ProcessRequest req) {
+    @PostMapping(value = "/process", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> process(@RequestBody ProcessRequest req) {
         String op = Optional.ofNullable(req.operation()).orElse("").trim();
         String text = Optional.ofNullable(req.content()).orElse("").trim();
 
@@ -38,7 +37,18 @@ public class ResearchController {
             request.setOperation(op);
             
             String result = researchService.processContent(request);
-            return ResponseEntity.ok(Map.of("operation", op, "result", result));
+            
+            // For paraphrase operation, return plain text
+            if ("paraphrase".equals(op)) {
+                return ResponseEntity.ok()
+                    .contentType(MediaType.TEXT_PLAIN)
+                    .body(result);
+            }
+            
+            // For other operations, return JSON
+            return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("operation", op, "result", result));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(Map.of("error", "Processing failed: " + e.getMessage()));

@@ -2,7 +2,6 @@ package com.research.assistant;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
@@ -24,15 +23,6 @@ public class ResearchService {
         this.webClient = webClientBuilder.build();
         this.objectMapper = objectMapper;
         
-        // Configure port for Render deployment
-        String port = System.getenv("PORT");
-        if (port != null) {
-            System.setProperty("server.port", port);
-            log.info("Server configured to run on Render port: {}", port);
-        } else {
-            log.info("Server will use default port: 8080");
-        }
-        
         // Use environment variables directly - no configuration files needed
         this.geminiApiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=";
         this.geminiApiKey = System.getenv("GEMINI_KEY");
@@ -41,7 +31,6 @@ public class ResearchService {
         log.info("API URL configured: {}", geminiApiUrl);
         log.info("API Key configured: {}", geminiApiKey != null && !geminiApiKey.trim().isEmpty());
         log.info("Environment variables:");
-        log.info("PORT: {}", System.getenv("PORT"));
         log.info("GEMINI_KEY: {}", System.getenv("GEMINI_KEY") != null ? "SET" : "NOT SET");
     }
 
@@ -133,7 +122,7 @@ public class ResearchService {
                 prompt.append("Based on the following content: suggest related topics and further reading. Format the response with clear headings and bullet points:\n\n");
                 break;
             case "paraphrase":
-                prompt.append("Paraphrase the following text to express the same meaning in different words, while maintaining the original tone and context. Do not add any extra explanations or introductory phrases:\n\n");
+                prompt.append("Rewrite the following text using different words while keeping the exact same meaning. Return only the paraphrased text without any additional explanations or commentary:\n\n");
                 break;
             default:
                 throw new IllegalArgumentException("Unknown Operation: " + request.getOperation());

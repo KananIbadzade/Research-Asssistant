@@ -1,0 +1,48 @@
+{
+    "manifest_version": 3,
+    "name": "Research Assistant",
+    "version": "1.0",
+    "description": "AI-powered Research Assistant",
+    "icons": {
+        "32": "icons/icon32.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "permissions": [
+        "activeTab",
+        "storage",
+        "sidePanel",
+        "scripting",
+        "tabs",
+        "clipboardWrite"
+    ],
+    "action": {
+        "default_title": "Research Assistant",
+        "default_icon": {
+            "32": "icons/icon32.png"
+        }
+    },
+    "side_panel": {
+        "default_path": "sidepanel.html"
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"],
+            "run_at": "document_end",
+            "all_frames": false
+        }
+    ],
+    "host_permissions": [
+        "http://localhost:8080/*",
+        "https://research-assistant-backend.onrender.com/*",
+        "https://*.onrender.com/*",
+        "<all_urls>"
+    ],
+    "content_security_policy": {
+        "extension_pages": "script-src 'self'; object-src 'self'"
+    }
+}

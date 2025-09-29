@@ -1,4 +1,3 @@
-HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
@@ -32,17 +31,6 @@ build/
 ### VS Code ###
 .vscode/
 
-# Local Spring / application overrides - keep secrets out of git
-src/main/resources/application.properties
-
-# build outputs
-**/target/
-**/build/
-
-# IDE
-.idea/
-.vscode/
-
 # OS
 .DS_Store
 
@@ -52,3 +40,4 @@ src/main/resources/application.properties
 *.key
 *.p12
 *-credentials.json
+/.idea

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Research Assistant</title>
+    <link rel="stylesheet" href="sidepanel.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>🐘 Research Assistant</h2>
+        </div>
+
+        <div class="actions-section">
+        <button id="summarizeBtn" class="primary-btn" style="display:none;">
+            <i class="fas fa-magic-wand-sparkles"></i>
+            Summarize
+        </button>
+        <button id="paraphraseBtn" class="primary-btn" style="display:none; margin-left: 8px;">
+            <i class="fas fa-pen-nib"></i>
+            Paraphrase
+        </button>
+        <button id="quoteCiteBtn" class="primary-btn" style="display:inline-flex; margin-left:8px;">
+            <i class="fas fa-quote-right"></i>
+            Cite the Quote
+        </button>
+        </div>
+
+
+        <div class="buckets-section">
+            <div class="section-header">
+                <h3><i class="fas fa-folder"></i> Notes</h3>
+                <button id="addBucketBtn" class="icon-btn" title="Add new folder">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+            <div id="bucketsList" class="buckets-container"></div>
+        </div>
+
+        <div class="notes-section">
+            <div class="section-header">
+                <h3 id="activeNotesBucketName"><i class="fas fa-book-open"></i> Note Editor</h3>
+                <div class="note-actions">
+                    <div class="color-buttons">
+                        <button id="highlightYellowBtn" class="color-btn" title="Highlight selected text in Yellow" data-color="yellow">
+                            <i class="fas fa-highlighter" style="color: #ffeb3b;"></i>
+                        </button>
+                        <button id="highlightGreenBtn" class="color-btn" title="Highlight selected text in Green" data-color="green">
+                            <i class="fas fa-highlighter" style="color: #4caf50;"></i>
+                        </button>
+                        <button id="highlightBlueBtn" class="color-btn" title="Highlight selected text in Blue" data-color="blue">
+                            <i class="fas fa-highlighter" style="color: #2196f3;"></i>
+                        </button>
+                        <button id="highlightPinkBtn" class="color-btn" title="Highlight selected text in Pink" data-color="pink">
+                            <i class="fas fa-highlighter" style="color: #e91e63;"></i>
+                        </button>
+                        <button id="highlightOrangeBtn" class="color-btn" title="Highlight selected text in Orange" data-color="orange">
+                            <i class="fas fa-highlighter" style="color: #ff9800;"></i>
+                        </button>
+                        <button id="eraseBtn" class="color-btn erase-btn" title="Remove highlight from selected text (works on web pages and notes)">
+                            <i class="fas fa-eraser"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="notes-container">
+                <div id="notes" class="notes-editor" contenteditable="true" data-placeholder="Write your notes here..."></div>
+            </div>
+        </div>
+
+        <div id="results" class="results-section">
+            <!-- Summaries will be injected here -->
+        </div>
+
+        <!-- Bucket Creation Modal -->
+        <div id="bucketModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create New Folder</h3>
+                    <button class="close-btn" id="closeBucketModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="bucketNameInput" placeholder="Enter folder name..." maxlength="30">
+                </div>
+                <div class="modal-footer">
+                    <button id="createBucketBtn" class="primary-btn">Create Folder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Load citation-js from CDN so formatAPA can use it in the sidepanel.
+         You can also install with `npm install citation-js` and bundle it accordingly. -->
+    <script src="https://cdn.jsdelivr.net/npm/citation-js@0.5.0/dist/citation.min.js"></script>
+    <script src="config.js"></script>
+    <script src="sidepanel.js"></script>
+</body>
+</html>
