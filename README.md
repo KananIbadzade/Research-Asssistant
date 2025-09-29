@@ -118,6 +118,7 @@ Edit `research-assistant-ext/config.js`:
 - **API errors**: Verify backend is running and GEMINI_KEY is set correctly
 - **No response**: Check Gemini API key is valid and backend is accessible
 - **Notes not saving**: Ensure you're not in incognito mode (local storage disabled)
+- **Slow first request**: Free Render hosting sleeps after 15min inactivity - first request takes 30-60s to wake up
 
 ## Deployment
 
@@ -153,6 +154,8 @@ Edit `research-assistant-ext/config.js`:
    - Load extension in Chrome
    - Test summarization and paraphrasing features
    - Verify everything works with the deployed backend
+
+**⚠️ Important Note**: Due to Render's free plan, the backend sleeps after 15 minutes of inactivity. The first request after sleep may take 30-60 seconds to wake up the service. Please be patient during the initial load - this is normal for free cloud hosting! ☁️
 
 ### Manual Extension Installation
 

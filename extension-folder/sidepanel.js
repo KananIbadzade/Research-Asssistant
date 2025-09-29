@@ -46,22 +46,40 @@ function setupEventListeners() {
 
     // Universal highlight buttons (work for both web pages and notes)
     const highlightYellowBtn = document.getElementById('highlightYellowBtn');
-    if (highlightYellowBtn) highlightYellowBtn.addEventListener('click', () => universalHighlight('yellow'));
+    if (highlightYellowBtn) highlightYellowBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        universalHighlight('yellow');
+    });
 
     const highlightGreenBtn = document.getElementById('highlightGreenBtn');
-    if (highlightGreenBtn) highlightGreenBtn.addEventListener('click', () => universalHighlight('green'));
+    if (highlightGreenBtn) highlightGreenBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        universalHighlight('green');
+    });
 
     const highlightBlueBtn = document.getElementById('highlightBlueBtn');
-    if (highlightBlueBtn) highlightBlueBtn.addEventListener('click', () => universalHighlight('blue'));
+    if (highlightBlueBtn) highlightBlueBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        universalHighlight('blue');
+    });
 
     const highlightPinkBtn = document.getElementById('highlightPinkBtn');
-    if (highlightPinkBtn) highlightPinkBtn.addEventListener('click', () => universalHighlight('pink'));
+    if (highlightPinkBtn) highlightPinkBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        universalHighlight('pink');
+    });
 
     const highlightOrangeBtn = document.getElementById('highlightOrangeBtn');
-    if (highlightOrangeBtn) highlightOrangeBtn.addEventListener('click', () => universalHighlight('orange'));
+    if (highlightOrangeBtn) highlightOrangeBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        universalHighlight('orange');
+    });
 
     const eraseBtn = document.getElementById('eraseBtn');
-    if (eraseBtn) eraseBtn.addEventListener('click', () => universalHighlight('remove'));
+    if (eraseBtn) eraseBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        universalHighlight('remove');
+    });
 
     // Modal event listeners
     const closeBucketModal = document.getElementById('closeBucketModal');
@@ -248,65 +266,52 @@ async function getPageMetadata() {
     }
 }
 
-// Build a CSL/CSL-JSON object and format APA using citation-js (Cite global)
+// Simple APA citation formatter (no external dependencies)
 function formatAPA(meta) {
     try {
-        // Build CSL entry
-        const csl = {
-            id: '1',
-            type: meta.doi ? 'article-journal' : 'webpage',
-            title: meta.title || '',
-            author: [],
-            issued: undefined,
-            'container-title': undefined,
-            publisher: meta.publisher || undefined,
-            URL: meta.url || undefined,
-            DOI: meta.doi || undefined,
-            accessed: undefined
-        };
-        if (meta.authors && meta.authors.length > 0) {
-            csl.author = meta.authors.map(name => {
-                if (typeof name !== 'string') return { literal: String(name) };
-                const parts = name.trim().split(/\s+/);
-                if (parts.length === 1) return { literal: parts[0] };
-                const family = parts.pop();
-                const given = parts.join(' ');
-                return { given, family };
-            });
-        }
+        // Extract year from date
+        let year = 'n.d.';
         if (meta.date) {
-            const d = new Date(meta.date);
-            if (!isNaN(d)) csl.issued = { 'date-parts': [[d.getFullYear(), d.getMonth() + 1, d.getDate()]] };
-            else {
-                const y = (meta.date.match(/(\d{4})/) || [])[1];
-                if (y) csl.issued = { 'date-parts': [[parseInt(y, 10)]] };
+            const dateMatch = meta.date.match(/(\d{4})/);
+            if (dateMatch) {
+                year = dateMatch[1];
             }
         }
-        if (meta.access_date) {
-            const parts = meta.access_date.split('-').map(p => parseInt(p, 10));
-            if (parts.length === 3) csl.accessed = { 'date-parts': [[parts[0], parts[1], parts[2]]] };
-        }
-        const citeObj = new Cite([csl]);
-        const bibliography = citeObj.format('bibliography', { format: 'text', template: 'apa', lang: 'en-US' }).trim();
-        let inText = '';
+        
+        // Get author name for in-text citation
+        let authorLabel = 'Unknown';
         if (meta.authors && meta.authors.length > 0) {
-            const first = meta.authors[0];
-            const parts = first.trim().split(/\s+/);
-            const last = parts.length > 0 ? parts[parts.length - 1] : first;
-            const year = (csl.issued && csl.issued['date-parts'] && csl.issued['date-parts'][0] && csl.issued['date-parts'][0][0]) || 'n.d.';
-            inText = `(${last}, ${year})`;
+            const firstAuthor = meta.authors[0];
+            const nameParts = firstAuthor.trim().split(/\s+/);
+            authorLabel = nameParts[nameParts.length - 1]; // Last name
         } else if (meta.publisher) {
-            inText = `(${meta.publisher}, n.d.)`;
-        } else {
-            inText = `(n.d.)`;
+            authorLabel = meta.publisher;
         }
+        
+        // Format bibliography entry
+        let bibliography = '';
+        if (meta.authors && meta.authors.length > 0) {
+            const authors = meta.authors.map(author => {
+                const parts = author.trim().split(/\s+/);
+                if (parts.length === 1) return author;
+                const lastName = parts[parts.length - 1];
+                const firstNames = parts.slice(0, -1).map(name => name.charAt(0) + '.').join(' ');
+                return `${lastName}, ${firstNames}`;
+            }).join(', ');
+            bibliography = `${authors}. (${year}). ${meta.title || 'Untitled'}. ${meta.publisher || 'Unknown publisher'}. ${meta.url || ''}`;
+        } else {
+            bibliography = `${meta.publisher || 'Unknown'}. (${year}). ${meta.title || 'Untitled'}. ${meta.url || ''}`;
+        }
+        
+        // Format in-text citation
+        const inText = `(${authorLabel}, ${year})`;
+        
         return { bibliography, inText };
     } catch (err) {
-        const year = meta.date ? (new Date(meta.date).getFullYear() || 'n.d.') : 'n.d.';
-        const authorLabel = (meta.authors && meta.authors[0]) ? meta.authors[0].split(/\s+/).slice(-1)[0] : (meta.publisher || 'Site');
-        const bibliography = `${authorLabel}. (${year}). ${meta.title || ''}. ${meta.url || ''}`;
-        const inText = `(${authorLabel}, ${year})`;
-        return { bibliography, inText };
+        console.error('Error formatting citation:', err);
+        const fallbackBibliography = `${meta.publisher || 'Unknown'}. (n.d.). ${meta.title || 'Untitled'}. ${meta.url || ''}`;
+        const fallbackInText = `(${meta.publisher || 'Unknown'}, n.d.)`;
+        return { bibliography: fallbackBibliography, inText: fallbackInText };
     }
 }
 
@@ -385,22 +390,29 @@ function summarizeText() {
         }
 
         try {
+            console.log('Sending SUMMARIZE message to background script');
             chrome.runtime.sendMessage({ type: 'SUMMARIZE', text: selectedText }, (resp) => {
+                console.log('Received response from background:', resp);
+                
                 if (chrome.runtime.lastError) {
-                    showResult(`Error: ${chrome.runtime.lastError.message}`, 'error');
+                    console.error('Chrome runtime error:', chrome.runtime.lastError);
+                    showResult(`Extension Error: ${chrome.runtime.lastError.message}`, 'error');
                     showSummarizingAnimation(false);
                     return;
                 }
                 if (!resp) {
-                    showResult('Error: No response from background', 'error');
+                    console.error('No response from background script');
+                    showResult('Error: No response from background script - check if extension is working', 'error');
                     showSummarizingAnimation(false);
                     return;
                 }
                 if (!resp.ok) {
-                    showResult(`Error: ${resp.data?.error || resp.error || 'Failed'}`, 'error');
+                    console.error('API request failed:', resp.error);
+                    showResult(`Error: ${resp.error || 'Request failed'}`, 'error');
                     showSummarizingAnimation(false);
                     return;
                 }
+                console.log('Summarization successful:', resp.data);
                 showResult(resp.data.result, 'success');
                 lastActionWasCitation = false;
                 showSummarizingAnimation(false);
@@ -441,8 +453,8 @@ async function paraphraseQuote() {
 
         const paraphrasedText = await response.text();
         
-        // Show citation only if the last action was citation
-        if (lastActionWasCitation && lastQuotedText) {
+        // Always show citation if we have quoted text (from previous citation action)
+        if (lastQuotedText) {
             // Get metadata for citation
             const meta = await getPageMetadata();
             if (meta) {
@@ -461,8 +473,8 @@ async function paraphraseQuote() {
             showResult(paraphrasedText);
         }
         
-        // Reset the citation flag after paraphrasing
-        lastActionWasCitation = false;
+        // Keep the citation flag for potential further paraphrasing
+        // Don't reset lastActionWasCitation here
 
     } catch (error) {
         showResult(`Error: ${error.message}`, 'error');
@@ -478,6 +490,7 @@ async function universalHighlight(colorOrAction) {
     
     console.log('universalHighlight called with:', colorOrAction);
     console.log('Selection range count:', selection.rangeCount);
+    console.log('Selection text:', selection.toString());
     
     // Check if selection is within the notes editor
     if (selection.rangeCount > 0 && notesEditor.contains(selection.getRangeAt(0).commonAncestorContainer)) {
@@ -494,12 +507,22 @@ async function universalHighlight(colorOrAction) {
                 return;
             }
             
+            // First, get the current selection from the web page
+            const selectedText = await fetchSelectedText();
+            if (!selectedText) {
+                console.log('No text selected on web page');
+                return;
+            }
+            
+            console.log('Selected text from web page:', selectedText);
             console.log('Sending highlight message to tab:', tab.id, 'color/action:', colorOrAction);
+            
             // Send message to content script to highlight or remove highlight
             const response = await chrome.tabs.sendMessage(tab.id, { 
                 type: 'highlightWebPage', 
                 action: colorOrAction,
-                preserveSelection: true
+                preserveSelection: true,
+                selectedText: selectedText
             });
             console.log('Content script response:', response);
             
@@ -848,14 +871,37 @@ function showResult(content, type = 'info') {
         copyBtn.innerHTML = '<i class="far fa-copy"></i>';
         copyBtn.addEventListener('click', async () => {
             try {
+                // Extract clean text from HTML content
+                let textToCopy = content;
+                if (content.includes('<blockquote') || content.includes('<div')) {
+                    // If content contains HTML, extract clean text
+                    const tempDiv = document.createElement('div');
+                    tempDiv.innerHTML = content;
+                    
+                    // Extract the quoted text (from blockquote)
+                    const blockquote = tempDiv.querySelector('blockquote');
+                    const quotedText = blockquote ? blockquote.textContent.trim() : '';
+                    
+                    // Extract in-text citation (from the div with "In-text citation:")
+                    const citationDiv = tempDiv.querySelector('div');
+                    const citationText = citationDiv ? citationDiv.textContent.replace('In-text citation:', '').trim() : '';
+                    
+                    // Extract APA bibliography (from the last div, remove "APA (bibliography):" label)
+                    const apaDiv = tempDiv.querySelector('div:last-child');
+                    const apaText = apaDiv ? apaDiv.textContent.replace('APA (bibliography):', '').trim() : '';
+                    
+                    // Format: Quote + 2 lines + Citation + 2 lines + APA
+                    textToCopy = `${quotedText}\n\n${citationText}\n\n${apaText}`;
+                }
+                
                 // Try modern clipboard API first
                 if (navigator.clipboard && navigator.clipboard.writeText) {
-                    await navigator.clipboard.writeText(content);
+                    await navigator.clipboard.writeText(textToCopy);
                     console.log('Text copied to clipboard successfully');
                 } else {
                     // Fallback method for older browsers or restricted contexts
                     const textArea = document.createElement('textarea');
-                    textArea.value = content;
+                    textArea.value = textToCopy;
                     textArea.style.position = 'fixed';
                     textArea.style.left = '-999999px';
                     textArea.style.top = '-999999px';

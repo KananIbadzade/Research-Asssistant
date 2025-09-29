@@ -1,5 +1,6 @@
 package com.research.assistant;
 
+import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
@@ -78,6 +79,7 @@ public class ResearchService {
                     .bodyValue(requestBody)
                     .retrieve()
                     .bodyToMono(String.class)
+                    .timeout(Duration.ofSeconds(25))
                     .block();
 
             log.info("Received response from Gemini API: {}", response);

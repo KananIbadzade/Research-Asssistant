@@ -2,6 +2,7 @@
 (function() {
     let lastSelection = '';
     let selectionTimeout = null;
+    let savedRange = null; // Store the last selection range
 
     // Function to get current selection
     function getCurrentSelection() {
@@ -29,6 +30,15 @@
         const currentSelection = getCurrentSelection();
         const hasSelection = currentSelection.length > 0;
         
+        // Save the current range if there's a selection
+        if (hasSelection) {
+            const selection = window.getSelection();
+            if (selection.rangeCount > 0) {
+                savedRange = selection.getRangeAt(0).cloneRange();
+                console.log('Saved selection range:', savedRange.toString());
+            }
+        }
+        
         // Only notify if selection state changed
         if (currentSelection !== lastSelection) {
             lastSelection = currentSelection;
@@ -42,12 +52,18 @@
         if (selectionTimeout) {
             clearTimeout(selectionTimeout);
         }
-        selectionTimeout = setTimeout(handleSelectionChange, 100);
+        selectionTimeout = setTimeout(handleSelectionChange, 50);
     });
 
     // Also listen for mouseup and keyup events for better coverage
-    document.addEventListener('mouseup', handleSelectionChange);
-    document.addEventListener('keyup', handleSelectionChange);
+    document.addEventListener('mouseup', () => {
+        // Immediate check for mouseup to catch quick selections
+        setTimeout(handleSelectionChange, 10);
+    });
+    document.addEventListener('keyup', () => {
+        // Immediate check for keyup to catch keyboard selections
+        setTimeout(handleSelectionChange, 10);
+    });
 
     // Initial check
     handleSelectionChange();
@@ -64,14 +80,25 @@
             } else if (request.type === 'highlightWebPage') {
                 console.log('Content script: highlightWebPage called with action:', request.action);
                 console.log('Preserve selection flag:', request.preserveSelection);
+                console.log('Selected text from sidepanel:', request.selectedText);
                 
                 // Check if we have a current selection
                 const currentSelection = window.getSelection();
                 console.log('Current selection range count:', currentSelection.rangeCount);
                 console.log('Current selected text:', currentSelection.toString());
                 
-                if (currentSelection.rangeCount > 0 && currentSelection.toString().trim()) {
+                // Try to use saved range first, then current selection, then find text
+                if (savedRange && savedRange.toString().trim()) {
+                    console.log('Using saved range for highlighting:', savedRange.toString());
+                    highlightRange(savedRange, request.action);
+                    sendResponse({ ok: true, success: true, message: 'Highlight applied successfully' });
+                } else if (currentSelection.rangeCount > 0 && currentSelection.toString().trim()) {
+                    console.log('Using current selection for highlighting');
                     toggleHighlight(request.action);
+                    sendResponse({ ok: true, success: true, message: 'Highlight applied successfully' });
+                } else if (request.selectedText && request.selectedText.trim()) {
+                    console.log('Using selectedText from sidepanel for highlighting');
+                    highlightTextInPage(request.selectedText, request.action);
                     sendResponse({ ok: true, success: true, message: 'Highlight applied successfully' });
                 } else {
                     console.log('No valid selection found for highlighting');
@@ -155,112 +182,173 @@
         return meta;
     }
 
-    // Function to toggle highlight on selected text
+    // Function to highlight a specific range
+    function highlightRange(range, action = 'yellow') {
+        console.log('highlightRange called with:', range.toString(), action);
+        
+        try {
+            if (action === 'remove') {
+                removeHighlights(range);
+            } else {
+                addHighlight(range, action);
+            }
+            console.log('Range highlighted successfully');
+        } catch (error) {
+            console.error('Error highlighting range:', error);
+        }
+    }
+
+    // Function to highlight specific text in the page
+    function highlightTextInPage(textToHighlight, action = 'yellow') {
+        console.log('highlightTextInPage called with:', textToHighlight, action);
+        
+        try {
+            // Find the text in the page
+            const walker = document.createTreeWalker(
+                document.body,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let textNode;
+            while (textNode = walker.nextNode()) {
+                const text = textNode.textContent;
+                if (text.includes(textToHighlight)) {
+                    console.log('Found text to highlight:', text);
+                    
+                    // Create a range for the found text
+                    const range = document.createRange();
+                    const startIndex = text.indexOf(textToHighlight);
+                    const endIndex = startIndex + textToHighlight.length;
+                    
+                    range.setStart(textNode, startIndex);
+                    range.setEnd(textNode, endIndex);
+                    
+                    // Apply highlighting
+                    if (action === 'remove') {
+                        removeHighlights(range);
+                    } else {
+                        addHighlight(range, action);
+                    }
+                    
+                    console.log('Text highlighted successfully');
+                    return;
+                }
+            }
+            
+            console.log('Text not found in page');
+        } catch (error) {
+            console.error('Error highlighting text in page:', error);
+        }
+    }
+
+    // Improved highlighting function
     function toggleHighlight(action = 'yellow') {
         console.log('toggleHighlight called with action:', action);
         const selection = window.getSelection();
-        console.log('Selection object:', selection);
-        console.log('Range count:', selection.rangeCount);
-
+        
         if (!selection.rangeCount) {
             console.log('No selection range found');
             return;
         }
 
         const range = selection.getRangeAt(0);
-        const selectedText = selection.toString();
-        console.log('Selected text:', selectedText);
-        console.log('Range start:', range.startContainer);
-        console.log('Range end:', range.endContainer);
+        const selectedText = range.toString();
 
-        if (!selectedText) {
+        if (!selectedText || !selectedText.trim()) {
             console.log('No selected text found');
             return;
         }
 
-        if (action === 'remove') {
-            // ERASE: Remove ALL highlights from the selected text
-            console.log('Erasing highlights from:', selectedText);
-
-            // Extract the selected content
-            const contents = range.extractContents();
-
-            // Create a temporary container to process the content
-            const tempDiv = document.createElement('div');
-            tempDiv.appendChild(contents);
-
-            // Remove all highlight spans from the content
-            const highlightSpans = tempDiv.querySelectorAll('span[style*="background-color"], span.research-assistant-highlight');
-            highlightSpans.forEach(span => {
-                // Replace span with its text content
-                const textNode = document.createTextNode(span.textContent);
-                span.parentNode.replaceChild(textNode, span);
-            });
-
-            // Insert the cleaned content back
-            range.insertNode(tempDiv);
-
-            // Remove the temporary div, keeping only its contents
-            while (tempDiv.firstChild) {
-                tempDiv.parentNode.insertBefore(tempDiv.firstChild, tempDiv);
+        try {
+            if (action === 'remove') {
+                // ERASE: Remove highlights without breaking DOM structure
+                removeHighlights(range);
+            } else {
+                // HIGHLIGHT: Add highlight without breaking DOM structure
+                addHighlight(range, action);
             }
-            tempDiv.parentNode.removeChild(tempDiv);
+        } catch (error) {
+            console.error('Highlighting error:', error);
+        }
+    }
 
-            // Re-select the cleaned text
-            const newRange = document.createRange();
-            newRange.setStartBefore(range.startContainer);
-            newRange.setEndAfter(range.endContainer);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-
-            console.log('Highlights erased successfully');
-
-        } else {
-            // HIGHLIGHT: Add highlight to the selected text
-            console.log('Adding highlight to:', selectedText);
-
-            // First, remove any existing highlights from the selection
-            const contents = range.extractContents();
-            const tempDiv = document.createElement('div');
-            tempDiv.appendChild(contents);
-
-            // Remove existing highlights
-            const existingHighlights = tempDiv.querySelectorAll('span[style*="background-color"], span.research-assistant-highlight');
-            existingHighlights.forEach(span => {
-                const textNode = document.createTextNode(span.textContent);
-                span.parentNode.replaceChild(textNode, span);
-            });
-
-            // Create new highlight span with the specified color
-            const colorMap = {
-                'yellow': '#ffeb3b',
-                'green': '#4caf50',
-                'blue': '#2196f3',
-                'pink': '#e91e63',
-                'orange': '#ff9800'
-            };
-            
-            const highlightColor = colorMap[action] || '#ffeb3b';
-            const highlightSpan = document.createElement('span');
-            highlightSpan.style.backgroundColor = highlightColor;
-            highlightSpan.style.color = 'black';
-            highlightSpan.className = 'research-assistant-highlight';
-            
-            // Move all content into the highlight span
-            while (tempDiv.firstChild) {
-                highlightSpan.appendChild(tempDiv.firstChild);
+    // Remove highlights without extracting content
+    function removeHighlights(range) {
+        console.log('Removing highlights from range');
+        
+        // Find all highlight spans within the range
+        const walker = document.createTreeWalker(
+            range.commonAncestorContainer,
+            NodeFilter.SHOW_ELEMENT,
+            {
+                acceptNode: function(node) {
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        const style = node.style || window.getComputedStyle(node);
+                        if (style.backgroundColor && style.backgroundColor !== 'rgba(0, 0, 0, 0)' && style.backgroundColor !== 'transparent') {
+                            return NodeFilter.FILTER_ACCEPT;
+                        }
+                        if (node.classList && node.classList.contains('research-assistant-highlight')) {
+                            return NodeFilter.FILTER_ACCEPT;
+                        }
+                    }
+                    return NodeFilter.FILTER_SKIP;
+                }
             }
-            
-            // Insert the highlighted content
-            range.insertNode(highlightSpan);
-            
-            // Re-select the highlighted text
-            const newRange = document.createRange();
-            newRange.selectNode(highlightSpan);
-            selection.removeAllRanges();
-            selection.addRange(newRange);
-            
+        );
+
+        const spansToRemove = [];
+        let node;
+        while (node = walker.nextNode()) {
+            if (range.intersectsNode(node)) {
+                spansToRemove.push(node);
+            }
+        }
+
+        // Remove highlight spans and replace with text nodes
+        spansToRemove.forEach(span => {
+            const textNode = document.createTextNode(span.textContent);
+            span.parentNode.replaceChild(textNode, span);
+        });
+
+        console.log('Highlights removed successfully');
+    }
+
+    // Add highlight without extracting content
+    function addHighlight(range, color) {
+        console.log('Adding highlight:', color);
+        
+        // First remove any existing highlights
+        removeHighlights(range);
+        
+        // Create highlight span
+        const colorMap = {
+            'yellow': '#ffeb3b',
+            'green': '#4caf50',
+            'blue': '#2196f3',
+            'pink': '#e91e63',
+            'orange': '#ff9800'
+        };
+        
+        const highlightColor = colorMap[color] || '#ffeb3b';
+        const highlightSpan = document.createElement('span');
+        highlightSpan.style.backgroundColor = highlightColor;
+        highlightSpan.style.color = 'black';
+        highlightSpan.className = 'research-assistant-highlight';
+        
+        try {
+            // Try to surround the selection with highlight span
+            range.surroundContents(highlightSpan);
             console.log('Highlight added successfully');
+        } catch (surroundError) {
+            // If surroundContents fails, use extractContents as fallback
+            console.log('surroundContents failed, using fallback method');
+            
+            const contents = range.extractContents();
+            highlightSpan.appendChild(contents);
+            range.insertNode(highlightSpan);
+            console.log('Highlight added using fallback method');
         }
     }
 })();
