@@ -2,6 +2,8 @@
 
 A Chrome extension designed to help researchers, students, and professionals efficiently process and organize information from web pages. Perfect for anyone spending significant time browsing articles, research papers, and online content.
 
+## Quick demo: https://youtu.be/V8Yurh10JwQ
+
 ## Why I Built This
 
 As someone who spends considerable time reading research papers and articles online, I found myself constantly switching between multiple tools to:
