@@ -1,7 +1,7 @@
 // Configuration for Research Assistant Extension
 const CONFIG = {
     // Production URL - Deployed backend on Render
-    API_BASE_URL: 'https://research-assistant-backend.onrender.com',
+    API_BASE_URL: 'https://research-assistant-backend-6pka.onrender.com',
     
     // Development URL
     LOCAL_API_URL: 'http://localhost:8080',

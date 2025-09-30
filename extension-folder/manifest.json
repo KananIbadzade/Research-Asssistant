@@ -38,7 +38,7 @@
     ],
     "host_permissions": [
         "http://localhost:8080/*",
-        "https://research-assistant-backend.onrender.com/*",
+        "https://research-assistant-backend-6pka.onrender.com/*",
         "https://*.onrender.com/*",
         "<all_urls>"
     ],
