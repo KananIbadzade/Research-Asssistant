@@ -2,17 +2,17 @@
 
 > A Chrome extension that helps you summarize, take notes, and organize your research - all in one place!
 
-## 🎯 Quick Demo
+##  Quick Demo
 
-[Add your demo video/gif here]
+https://youtu.be/V8Yurh10JwQ
 
 ## 💡 Why I Built This
 
-As someone who spends hours researching online - reading articles, papers, and tons of content - I got tired of jumping between different tools to summarize stuff, take notes, and organize everything. So I built this extension to do it all in one spot. Simple as that! 
+As someone who spends hours researching online, reading articles, papers, and tons of content, I got tired of jumping between different tools to summarize stuff, take notes, and organize everything. So I built this extension to do it all in one spot. Simple as that.
 
-It's been super helpful for my own research workflow, and I thought others might find it useful too. 😊
+It's been super helpful for my own research workflow, and I thought others might find it useful too.
 
-## ✨ What It Does
+## What It Does
 
 - **Summarize** any text you select with AI
 - **Take notes** in an organized side panel
@@ -28,7 +28,7 @@ It's been super helpful for my own research workflow, and I thought others might
 
 **Backend:**
 - Java 17 + Spring Boot
-- Google Gemini AI API
+- Google Gemini  API
 
 **Hosting:**
 - Backend hosted on [Render](https://render.com) (free tier)
@@ -41,7 +41,7 @@ It's been super helpful for my own research workflow, and I thought others might
 4. Click "Load unpacked" and select the `extension-folder`
 5. That's it! Start using it on any webpage 🎉
 
-**⏳ First-time note:** The backend is on Render's free plan, so it sleeps after 15 minutes of inactivity. The first request might take 30-60 seconds to wake up - just be patient! After that, it's fast. ☕
+**⏳ First-time note:** The backend is on Render's free plan, so it sleeps after 15 minutes of inactivity. The first request might take 30-60 seconds to wake up, just be patient! After that, it's fast. ☕
 
 ## 🔧 Running It Locally (For Developers)
 
@@ -99,16 +99,14 @@ Want to host your own version? Super easy:
 
 4. **Reload extension in Chrome and you're done!**
 
-## 🤝 Contributing
+## Contributing
 
 Feel free to fork, improve, and make it better! Found a bug or have an idea? Open an issue or submit a PR. All contributions welcome! 
 
-## 📝 License
+## License
 
 MIT - do whatever you want with it!
 
 ---
 
 Built with ☕ and late-night coding sessions.
-
-If this helps your research workflow, give it a ⭐!
