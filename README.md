@@ -1,180 +1,114 @@
-# Research Assistant
+# 📚 Research Assistant
 
-A Chrome extension designed to help researchers, students, and professionals efficiently process and organize information from web pages. Perfect for anyone spending significant time browsing articles, research papers, and online content.
+> A Chrome extension that helps you summarize, take notes, and organize your research - all in one place!
 
-## Why I Built This
+## 🎯 Quick Demo
 
-As someone who spends considerable time reading research papers and articles online, I found myself constantly switching between multiple tools to:
-- Summarize lengthy content
-- Paraphrase complex ideas
-- Generate proper citations
-- Take organized notes
-- Highlight important sections
+[Add your demo video/gif here]
 
-This extension consolidates all these functions into one seamless workflow, saving time and improving research efficiency.
+## 💡 Why I Built This
 
-## Core Features
+As someone who spends hours researching online - reading articles, papers, and tons of content - I got tired of jumping between different tools to summarize stuff, take notes, and organize everything. So I built this extension to do it all in one spot. Simple as that! 
 
-- **AI Summarization**: Instantly summarize selected text using Google's Gemini AI
-- **Smart Paraphrasing**: Rewrite content while maintaining original meaning
-- **APA Citation Generation**: Create properly formatted academic citations
-- **Advanced Note-Taking**: Organize notes in folders with real-time auto-saving
-- **Text Highlighting**: Highlight web content and notes with multiple colors
-- **Persistent Storage**: Notes saved locally, never lost when switching folders
+It's been super helpful for my own research workflow, and I thought others might find it useful too. 😊
 
-## Technology Stack
+## ✨ What It Does
 
-### Frontend (Chrome Extension)
-- **JavaScript ES6+**: Modern JavaScript with async/await patterns
-- **Chrome Extension API**: Native browser integration with Manifest V3
-- **CSS3**: Responsive design with modern UI/UX principles
-- **HTML5**: Semantic markup with accessibility features
+- **Summarize** any text you select with AI
+- **Take notes** in an organized side panel
+- **Paraphrase** content to understand it better
+- **Generate citations** (APA format)
+- **Organize** your notes in folders
 
-### Backend (Spring Boot)
-- **Java 17**: Modern Java with Spring Boot framework
-- **Google Gemini AI**: Advanced AI integration for text processing
-- **RESTful API**: Clean API design with proper HTTP status codes
-- **Docker**: Containerized deployment for cloud platforms
+## 🛠️ Tech Stack
 
-### DevOps & Deployment
-- **GitHub**: Version control and code repository
-- **Render**: Free cloud hosting platform for backend
-- **Docker**: Containerization for consistent deployment
+**Frontend:**
+- JavaScript (Chrome Extension)
+- HTML/CSS
 
-## Setup Instructions
+**Backend:**
+- Java 17 + Spring Boot
+- Google Gemini AI API
 
-### Prerequisites
-- Chrome browser
-- Java 17+ (for local development)
-- Gemini API key (free from Google AI Studio)
+**Hosting:**
+- Backend hosted on [Render](https://render.com) (free tier)
 
-### 1. Clone Repository
+## 🚀 Quick Start (Just Use It!)
+
+1. Download the `extension-folder` from this repo
+2. Open Chrome and go to `chrome://extensions/`
+3. Turn on "Developer mode" (top right)
+4. Click "Load unpacked" and select the `extension-folder`
+5. That's it! Start using it on any webpage 🎉
+
+**⏳ First-time note:** The backend is on Render's free plan, so it sleeps after 15 minutes of inactivity. The first request might take 30-60 seconds to wake up - just be patient! After that, it's fast. ☕
+
+## 🔧 Running It Locally (For Developers)
+
+Want to customize it or run your own backend? Here's how:
+
+### 1. Clone the repo
 ```bash
 git clone https://github.com/KananIbadzade/Research-Assistant.git
-cd Research-Assistant
+cd Research-Assistant/research-assistant
 ```
 
-### 2. Get Gemini API Key
+### 2. Get a Gemini API Key
 - Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-- Create a new API key (free)
-- Copy the key for backend configuration
+- Sign in and create a free API key
+- Copy it
 
-### 3. Start Backend (Local Development)
+### 3. Run the backend
 ```bash
-cd research-assistant
-export GEMINI_KEY=your_gemini_api_key
+export GEMINI_KEY=your_api_key_here
 ./mvnw spring-boot:run
 ```
 
-### 4. Load Extension in Chrome
-- Open `chrome://extensions/`
-- Enable "Developer mode" (top-right toggle)
+The backend runs on `http://localhost:8080`
+
+### 4. Update extension config
+Edit `extension-folder/config.js` to point to your local backend:
+```javascript
+const API_BASE_URL = 'http://localhost:8080';
+```
+
+### 5. Load the extension
+- Go to `chrome://extensions/`
+- Enable "Developer mode"
 - Click "Load unpacked"
-- Select the `research-assistant-ext` folder
-- Pin the extension for easy access
+- Select the `extension-folder`
 
-### 5. Test Features
-- Open any webpage (Wikipedia, research papers, news articles)
-- Select text and test summarization, paraphrasing, and citation generation
-- Create note folders and test the note-taking functionality
-- Switch between folders to verify real-time saving works
+## ☁️ Deploy Your Own (Render Cloud)
 
-## Usage Examples
+Want to host your own version? Super easy:
 
-### Academic Research
-1. Open a research paper or article
-2. Select key paragraphs
-3. Generate summaries and paraphrases
-4. Create APA citations
-5. Organize notes in project folders
+1. **Get Gemini API Key** (see above)
 
-### Content Creation
-1. Research topics on multiple websites
-2. Collect and summarize information
-3. Paraphrase content for original writing
-4. Generate citations for sources
-5. Organize research in themed folders
-
-### Professional Use
-1. Research competitors or market trends
-2. Summarize lengthy reports
-3. Create clean, cited summaries
-4. Organize findings by project/client
-
-## Configuration
-
-### Extension Config
-Edit `research-assistant-ext/config.js`:
-- **Local development**: `http://localhost:8080` (default)
-- **Production**: Update with your deployed backend URL
-
-### Backend Configuration
-- Set `GEMINI_KEY` environment variable with your Google AI Studio API key
-- Backend runs on port 8080 by default
-
-## Troubleshooting
-
-- **Extension won't load**: Check Chrome developer mode is enabled
-- **API errors**: Verify backend is running and GEMINI_KEY is set correctly
-- **No response**: Check Gemini API key is valid and backend is accessible
-- **Notes not saving**: Ensure you're not in incognito mode (local storage disabled)
-- **Slow first request**: Free Render hosting sleeps after 15min inactivity - first request takes 30-60s to wake up
-
-## Deployment
-
-### Quick Deploy to Render (Free Cloud Hosting)
-
-1. **Get Gemini API Key**:
-   - Go to [Google AI Studio](https://makersuite.google.com/app/apikey)
-   - Create a free API key
-   - Copy the key
-
-2. **Deploy Backend to Render**:
-   - Go to [Render Dashboard](https://dashboard.render.com)
-   - Sign up/login with GitHub
+2. **Deploy to Render:**
+   - Sign up at [render.com](https://render.com)
    - Click "New +" → "Web Service"
-   - Connect your GitHub repository
-   - Configure:
-     ```
-     Name: research-assistant-backend
-     Environment: Docker
-     Region: Oregon (US West)
-     Branch: main
-     ```
-   - Set Environment Variable: `GEMINI_KEY=your_actual_api_key`
+   - Connect this GitHub repo
+   - Set environment: **Docker**
+   - Add environment variable: `GEMINI_KEY=your_api_key`
    - Click "Create Web Service"
-   - Wait for deployment (5-10 minutes)
-   - Note your service URL: `https://research-assistant-backend.onrender.com`
+   - Wait 5-10 mins for deployment
 
-3. **Extension is Already Configured**:
-   - Extension automatically uses the deployed backend
-   - No additional configuration needed
+3. **Update extension config:**
+   - Edit `extension-folder/config.js`
+   - Change API URL to your Render URL: `https://your-app.onrender.com`
 
-4. **Test Deployment**:
-   - Load extension in Chrome
-   - Test summarization and paraphrasing features
-   - Verify everything works with the deployed backend
+4. **Reload extension in Chrome and you're done!**
 
-**⚠️ Important Note**: Due to Render's free plan, the backend sleeps after 15 minutes of inactivity. The first request after sleep may take 30-60 seconds to wake up the service. Please be patient during the initial load - this is normal for free cloud hosting! ☁️
+## 🤝 Contributing
 
-### Manual Extension Installation
+Feel free to fork, improve, and make it better! Found a bug or have an idea? Open an issue or submit a PR. All contributions welcome! 
 
-1. **Load Extension in Chrome**:
-   - Open `chrome://extensions/`
-   - Enable "Developer mode"
-   - Click "Load unpacked"
-   - Select the `extension-folder` directory
+## 📝 License
 
-2. **Package for Distribution** (Optional):
-   ```bash
-   cd extension-folder
-   zip -r research-assistant-extension.zip .
-   ```
-
-## Repository
-
-**GitHub**: https://github.com/KananIbadzade/Research-Assistant
+MIT - do whatever you want with it!
 
 ---
 
-**Ready to streamline your research workflow?** Clone the repository and start using the extension today! 🚀
+Built with ☕ and late-night coding sessions.
+
+If this helps your research workflow, give it a ⭐!
