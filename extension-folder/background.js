@@ -24,9 +24,9 @@ async function testConnection(apiUrl) {
         
         const controller = new AbortController();
         const timeoutId = setTimeout(() => {
-            console.log('Connection timeout after 5 seconds');
+            console.log('Connection timeout after 30 seconds');
             controller.abort();
-        }, 5000);
+        }, 30000);
         
         const response = await fetch(`${apiUrl}/api/research/health`, {
             method: 'GET',
@@ -83,7 +83,7 @@ async function handleApiRequest(operation, text, sendResponse) {
     try {
         // Add timeout to prevent hanging
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+                const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 minute timeout for Render free plan
         
         const response = await fetch(`${apiUrl}/api/research/process`, {
             method: 'POST',
@@ -112,11 +112,11 @@ async function handleApiRequest(operation, text, sendResponse) {
     } catch (error) {
         console.error(`${operation} request failed:`, error);
         
-        if (error.name === 'AbortError') {
-            sendResponse({ 
-                ok: false, 
-                error: 'Request timeout - server may be slow or unavailable' 
-            });
+                if (error.name === 'AbortError') {
+                    sendResponse({ 
+                        ok: false, 
+                        error: 'Request timeout - Render free plan takes 1-2 minutes to wake up from sleep. Please wait and try again.' 
+                    });
         } else if (error.message.includes('fetch')) {
             sendResponse({ 
                 ok: false, 
